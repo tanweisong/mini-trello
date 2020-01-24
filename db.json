@@ -1,27 +1,13 @@
 {
   "lanes": [
-    { "id": 1, "title": "Lane 1" },
-    { "id": 2, "title": "Lane 2" },
-    { "id": 3, "title": "Lane 3" }
+    {
+      "title": "Lane 1",
+      "id": 1
+    }
   ],
   "tasks": [
     {
-      "id": 1,
-      "title": "Task 1",
-      "Description": "Task 1 Description",
-      "laneId": 1
-    },
-    {
-      "id": 2,
-      "title": "Task 1",
-      "Description": "Task 2 Description",
-      "laneId": 1
-    },
-    {
-      "id": 3,
-      "title": "Task 1",
-      "Description": "Task 3 Description",
-      "laneId": 2
+      "id": 1
     }
   ]
 }

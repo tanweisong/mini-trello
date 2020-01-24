@@ -5,12 +5,14 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "json-server": "json-server --watch db.json",
+    "server": "node server.js",
+    "start": "concurrently \"npm run server\" \"npm run json-server\""
   },
   "author": "Beck",
   "license": "MIT",
   "dependencies": {
-    "@webcomponents/webcomponentsjs": "^2.4.1",
+    "concurrently": "^5.0.2",
     "express": "^4.17.1"
   }
 }
