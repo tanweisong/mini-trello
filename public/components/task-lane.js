@@ -169,8 +169,6 @@ class TaskLane extends HTMLElement {
   }
 
   async createLane(inTitle) {
-    const lanes = await this.getLanes();
-    const inId = lanes.length + 1;
     const lane = {
       title: inTitle
     };

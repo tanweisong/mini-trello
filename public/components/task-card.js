@@ -23,8 +23,24 @@ class TaskCard extends HTMLElement {
 
     // create the view only element
     const nodeView = document.createElement("div");
+    nodeView.style.display = "flex";
+    nodeView.style.alignItems = "center";
     nodeView.className = "task-card-view";
     nodeView.addEventListener("click", this.handleCardClick);
+    nodeView.addEventListener("mouseover", this.handleCardMouseover);
+    nodeView.addEventListener("mouseout", this.handleCardMouseout);
+
+    const nodeViewTitle = document.createElement("div");
+    nodeViewTitle.style.flexGrow = 1;
+    nodeView.appendChild(nodeViewTitle);
+
+    const nodeViewDelete = document.createElement("div");
+    nodeViewDelete.innerHTML = "X";
+    nodeViewDelete.style.display = "none";
+    nodeViewDelete.addEventListener("click", this.handleDeleteCard);
+
+    nodeView.appendChild(nodeViewDelete);
+
     nodeContent.appendChild(nodeView);
 
     const nodeCreate = document.createElement("div");
@@ -70,11 +86,13 @@ class TaskCard extends HTMLElement {
   }
 
   get title() {
-    this.shadowRoot.querySelector(".task-card-view").innerHTML;
+    this.shadowRoot.querySelector(".task-card-view").children[0].innerHTML;
   }
 
   set title(value) {
-    this.shadowRoot.querySelector(".task-card-view").innerHTML = value;
+    this.shadowRoot.querySelector(
+      ".task-card-view"
+    ).children[0].innerHTML = value;
   }
 
   async checkTaskExists(inTitle) {
@@ -96,9 +114,6 @@ class TaskCard extends HTMLElement {
   }
 
   async createTask(inLaneId, inTitle) {
-    const host = this;
-    const tasks = await host.getTasks();
-    const taskId = tasks.length + 1;
     const task = {
       title: inTitle,
       laneId: inLaneId
@@ -109,6 +124,7 @@ class TaskCard extends HTMLElement {
       const Http = new XMLHttpRequest();
       const url = `http://localhost:3000/tasks`;
       Http.open("POST", url);
+      Http.setRequestHeader("Content-type", "application/json; charset=utf-8");
 
       Http.onload = e => {
         resolve(JSON.parse(Http.response));
@@ -129,10 +145,29 @@ class TaskCard extends HTMLElement {
     const nodeView = nodeContentItems[0];
     const nodeCreate = nodeContentItems[1];
 
-    nodeView.style.display = "block";
+    nodeView.style.display = "flex";
 
     nodeCreate.style.display = "none";
     nodeCreate.querySelector("textarea").value = "";
+  }
+
+  deleteCard(id) {
+    return new Promise((resolve, reject) => {
+      const Http = new XMLHttpRequest();
+      const url = `http://localhost:3000/tasks/${id}`;
+      Http.open("DELETE", url, true);
+      Http.setRequestHeader("Content-type", "application/json; charset=utf-8");
+
+      Http.onload = e => {
+        resolve(JSON.parse(Http.response));
+      };
+
+      Http.onerror = e => {
+        reject(Http.status);
+      };
+
+      Http.send(null);
+    });
   }
 
   async getTasks() {
@@ -167,7 +202,7 @@ class TaskCard extends HTMLElement {
       const card = await host.checkTaskExists(title);
 
       if (card != null && card.length === 0) {
-        const task = await host.createTask(laneId, title);
+        const task = await host.createTask(Number(laneId), title);
 
         if (task != null) {
         }
@@ -200,6 +235,37 @@ class TaskCard extends HTMLElement {
       nodeCreate.style.display = "flex";
       nodeCreate.querySelector("textarea").focus();
     }
+  }
+
+  handleCardMouseout(e) {
+    const host = e.target.getRootNode().host;
+    const taskCardView = host.shadowRoot.querySelector(".task-card-view");
+
+    if (!taskCardView.classList.contains("transparent")) {
+      const nodeViewDelete = taskCardView.children[1];
+
+      nodeViewDelete.style.display = "none";
+    }
+  }
+
+  handleCardMouseover(e) {
+    const host = e.target.getRootNode().host;
+    const taskCardView = host.shadowRoot.querySelector(".task-card-view");
+
+    if (!taskCardView.classList.contains("transparent")) {
+      const nodeViewDelete = taskCardView.children[1];
+
+      nodeViewDelete.style.display = "inline-block";
+    }
+  }
+
+  handleDeleteCard(e) {
+    e.stopPropagation();
+
+    const host = e.target.getRootNode().host;
+    const _id = host.getAttribute("_id");
+
+    host.deleteCard(_id);
   }
 
   connectedCallback() {
